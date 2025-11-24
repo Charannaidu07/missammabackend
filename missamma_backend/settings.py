@@ -7,7 +7,7 @@ SECRET_KEY = 'change-this-to-your-secret-key'  # use env in production
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']  # change in production
+ALLOWED_HOSTS = ['*','missammabackend.onrender.com','localhost','127.0.0.1']  # change in production
 
 INSTALLED_APPS = [
     'django.contrib.admin',
