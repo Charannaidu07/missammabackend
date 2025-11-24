@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice {{ order.id }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+    .title { font-size: 24px; font-weight: bold; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; }
+    th { background: #fdd2e3; }
+    .total-row td { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="title">Missamma Beauty Parlour</div>
+      <div>Bespoke Jewelry & Beauty Services</div>
+    </div>
+    <div>
+      <div>Order ID: {{ order.id }}</div>
+      <div>Date: {{ order.created_at|date:"d-m-Y" }}</div>
+    </div>
+  </div>
+
+  <div>
+    <h3>Billing Details</h3>
+    <p>
+      {{ order.billing_name }}<br>
+      {{ order.billing_address|linebreaksbr }}<br>
+      Phone: {{ order.billing_phone }}
+    </p>
+  </div>
+
+  <h3>Items</h3>
+  <table>
+    <tr>
+      <th>#</th>
+      <th>Product</th>
+      <th>Qty</th>
+      <th>Price</th>
+      <th>Line Total</th>
+    </tr>
+    {% for item in order.items.all %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ item.product.name }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>{{ item.price }}</td>
+      <td>{{ item.price|floatformat:2|add:""|floatformat:2|floatformat }}{{ item.price }}</td>
+    </tr>
+    {% endfor %}
+    <tr class="total-row">
+      <td colspan="4" style="text-align:right;">Total</td>
+      <td>₹ {{ order.total_amount }}</td>
+    </tr>
+  </table>
+
+  <p style="margin-top: 20px; font-size: 12px;">
+    Thank you for shopping with Missamma Beauty Parlour.
+  </p>
+</body>
+</html>
