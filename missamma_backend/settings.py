@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'change-this-to-your-secret-key'  # use env in production
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']  # change in production
 
