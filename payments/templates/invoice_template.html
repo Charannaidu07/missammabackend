@@ -343,7 +343,7 @@
   <script>
     window.onload = function () {
       // 1) Text for QR: the full URL of this invoice page
-      const qrText = "http://localhost:8000/api/payments/invoice/{{ order.id }}/";
+      const qrText = "https://missammabackend.onrender.com/api/payments/invoice/{{ order.id }}/";
       // 2) Text for barcode: just the invoice number (short = easier to scan)
       const barcodeText = "{{ invoice.invoice_number|escapejs }}";
 
