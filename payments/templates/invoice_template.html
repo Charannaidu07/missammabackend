@@ -4,12 +4,10 @@
 <head>
   <meta charset="UTF-8" />
   <title>Invoice {{ invoice.invoice_number }}</title>
-  <!-- keep your existing styles here -->
-
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #fce4ec; /* baby pink background */
+      background: #fce4ec;
       margin: 0;
       padding: 20px;
     }
@@ -249,6 +247,9 @@
         <div><strong>Order ID:</strong> {{ order.id }}</div>
         <div><strong>Date:</strong> {{ order.created_at|date:"d M Y, H:i" }}</div>
         <div><strong>Payment Status:</strong> {{ order.status }}</div>
+        {% if order.delivery_status %}
+        <div><strong>Delivery Status:</strong> {{ order.delivery_status }}</div>
+        {% endif %}
       </div>
     </div>
 
@@ -282,7 +283,14 @@
 
     <!-- small order info chips -->
     <div class="order-info-row">
-      <div class="chip">Mode: Online Prepaid (Razorpay / Wallet)</div>
+      <div class="chip">
+        Mode: 
+        {% if order.razorpay_order_id %} 
+          Online Prepaid (Razorpay)
+        {% else %}
+          Wallet Payment
+        {% endif %}
+      </div>
       <div class="chip">Customer: {{ customer.username }}</div>
       <div class="chip">Invoice Date: {{ invoice.generated_at|date:"d M Y" }}</div>
     </div>
@@ -302,12 +310,22 @@
         {% for item in items %}
         <tr>
           <td>{{ forloop.counter }}</td>
-          <td>{{ item.product.name }}</td>
+          <td>
+            {% if item.product %}
+              {{ item.product.name }}
+            {% else %}
+              Product #{{ item.product_id }}
+            {% endif %}
+          </td>
           <td>{{ item.quantity }}</td>
           <td class="price">{{ item.price }}</td>
           <td class="price">
-            {{ item.price|floatformat:2|add:""|floatformat }}
+            ₹ {{ item.line_total|default:item.get_line_total|floatformat:2 }}
           </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" style="text-align: center; color: #777;">No items in this order</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -318,12 +336,17 @@
       <div class="totals-inner">
         <div>
           <span>Subtotal</span>
-          <span>₹ {{ order.total_amount }}</span>
+          <span>₹ {{ order.total_amount|floatformat:2 }}</span>
         </div>
-        <!-- you can add tax / discount rows here later -->
+        {% if order.razorpay_order_id %}
+        <div>
+          <span>Cashback (5%)</span>
+          <span style="color: #2e7d32;">+₹ {{ cashback_amount|floatformat:2 }}</span>
+        </div>
+        {% endif %}
         <div class="total">
           <span>Grand Total</span>
-          <span>₹ {{ order.total_amount }}</span>
+          <span>₹ {{ order.total_amount|floatformat:2 }}</span>
         </div>
       </div>
     </div>
@@ -333,64 +356,74 @@
       This is a computer generated invoice for your order from
       <span>Missamma Beauty Parlour</span>. Keep this label inside your package
       like Amazon delivery bills &amp; present it during returns, if any.
+      {% if order.razorpay_order_id %}
+      <br><strong>5% cashback of ₹ {{ cashback_amount|floatformat:2 }} has been credited to your wallet!</strong>
+      {% endif %}
     </div>
   </div>
 
   <!-- Local QR + Barcode libraries -->
-  <script src="{% static 'js/JsBarcode.all.min.js' %}"></script>
-  <script src="{% static 'js/qrcode.min.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
   <script>
     window.onload = function () {
       // 1) Text for QR: the full URL of this invoice page
-      const qrText = "https://missammabackend.onrender.com/api/payments/invoice/{{ order.id }}/";
+      const qrText = window.location.href;
       // 2) Text for barcode: just the invoice number (short = easier to scan)
       const barcodeText = "{{ invoice.invoice_number|escapejs }}";
 
       // BARCODE (CODE 128)
       try {
-        JsBarcode("#barcode", barcodeText, {
-          format: "CODE128",
-          lineColor: "#000000",
-          width: 2,        // slightly thicker bars
-          height: 60,
-          displayValue: false,
-          margin: 4
-        });
+        if (typeof JsBarcode !== 'undefined') {
+          JsBarcode("#barcode", barcodeText, {
+            format: "CODE128",
+            lineColor: "#000000",
+            width: 2,
+            height: 60,
+            displayValue: false,
+            margin: 4
+          });
+        } else {
+          document.getElementById("barcode").innerHTML = "<div style='text-align:center; color:#777;'>Barcode: " + barcodeText + "</div>";
+        }
       } catch (e) {
         console.error("Barcode error:", e);
+        document.getElementById("barcode").innerHTML = "<div style='text-align:center; color:#777;'>Barcode: " + barcodeText + "</div>";
       }
 
-      // QR CODE (bigger + high error correction)
+      // QR CODE
       try {
         const qrContainer = document.getElementById("qrcode");
         qrContainer.innerHTML = "";
+        
+        if (typeof QRCode !== 'undefined') {
+          new QRCode(qrContainer, {
+            text: qrText,
+            width: 180,
+            height: 180,
+            correctLevel: QRCode.CorrectLevel.H
+          });
 
-        new QRCode(qrContainer, {
-          text: qrText,
-          width: 180,   // make it big
-          height: 180,
-          correctLevel: QRCode.CorrectLevel.H
-        });
-
-        // ensure good size when printing
-        const canvases = qrContainer.getElementsByTagName("canvas");
-        if (canvases.length > 0) {
-          canvases[0].style.width = "180px";
-          canvases[0].style.height = "180px";
+          // ensure good size when printing
+          const canvases = qrContainer.getElementsByTagName("canvas");
+          if (canvases.length > 0) {
+            canvases[0].style.width = "180px";
+            canvases[0].style.height = "180px";
+          }
+        } else {
+          qrContainer.innerHTML = "<div style='text-align:center; color:#777; padding:20px; border:1px dashed #ccc;'>QR Code<br>" + qrText.substring(0, 30) + "...</div>";
         }
       } catch (e) {
         console.error("QR error:", e);
+        document.getElementById("qrcode").innerHTML = "<div style='text-align:center; color:#777; padding:20px; border:1px dashed #ccc;'>QR Code Error</div>";
       }
 
       // Auto print after everything is drawn
       setTimeout(function () {
         window.print();
-      }, 800);
+      }, 1000);
     };
   </script>
-</body>
-</html>
-
 </body>
 </html>

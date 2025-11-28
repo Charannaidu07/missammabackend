@@ -5,18 +5,13 @@ from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.http import HttpResponse
-
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-
 from store.models import Order, OrderItem, Product
 from .models import WalletTransaction, Invoice
-
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_order(request):
@@ -282,13 +277,21 @@ def generate_invoice(request, order_id):
                 status=400
             )
 
-        items = OrderItem.objects.filter(order=order)
+        items = OrderItem.objects.filter(order=order).select_related('product')
+        
+        # Calculate cashback for Razorpay orders
+        cashback_amount = 0
+        if order.razorpay_order_id and order.status == 'PAID':
+            cashback_amount = (order.total_amount * decimal.Decimal("0.05")).quantize(
+                decimal.Decimal("0.01")
+            )
 
         return render(request, "invoice_template.html", {
             "order": order,
             "items": items,
             "invoice": invoice,
             "customer": request.user,
+            "cashback_amount": cashback_amount,
         })
 
     except Exception as e:
@@ -300,7 +303,6 @@ def generate_invoice(request, order_id):
             {"detail": "Invoice rendering failed: " + str(e)},
             status=500
         )
-
 
 
 
