@@ -22,6 +22,10 @@ class ProductListView(generics.ListAPIView):
     serializer_class = ProductSerializer
     permission_classes = [permissions.AllowAny]
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
 class ProductCategoryListView(generics.ListAPIView):
     queryset = ProductCategory.objects.all()
