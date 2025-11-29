@@ -7,7 +7,7 @@ SECRET_KEY = 'change-this-to-your-secret-key'  # use env in production
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['*','missammabackend.onrender.com','localhost','127.0.0.1']  # change in production
+ALLOWED_HOSTS = ['*','missammabackend.onrender.com','localhost','127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -29,7 +29,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # add this
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -37,13 +37,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# WhiteNoise configuration
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 ROOT_URLCONF = 'missamma_backend.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        #'DIRS': [BASE_DIR / 'templates'],  # for invoice.html
         'DIRS': [ BASE_DIR / "payments" / "templates" ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -59,10 +61,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'missamma_backend.wsgi.application'
 
-# DATABASES: adjust to MySQL/PostgreSQL as needed
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',   # dev only
+        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
@@ -81,9 +82,6 @@ TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -99,13 +97,16 @@ REST_FRAMEWORK = {
     )
 }
 
-STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+# Static files configuration
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")
-# RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
+# Media files configuration - ADD THIS SECTION
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 RAZORPAY_KEY_ID = 'rzp_test_Rj4ZkhrbwcjGuU'
 RAZORPAY_KEY_SECRET = 'z403hWDzvHVuJkBvfUehjT2i'
