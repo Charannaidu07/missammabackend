@@ -113,3 +113,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 RAZORPAY_KEY_ID = 'rzp_test_Rj4ZkhrbwcjGuU'
 RAZORPAY_KEY_SECRET = 'z403hWDzvHVuJkBvfUehjT2i'
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://missamma.onrender.com",
+    "https://missammabackend.onrender.com",
+]
