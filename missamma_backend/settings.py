@@ -4,11 +4,13 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'change-this-to-your-secret-key'  # use env in production
-# Add to settings.py
-BASE_URL = 'https://missammabackend.onrender.com'
+
 DEBUG = False
 
 ALLOWED_HOSTS = ['*','missammabackend.onrender.com','localhost','127.0.0.1']
+
+# Add this line for image URLs
+BASE_URL = 'https://missammabackend.onrender.com'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -105,7 +107,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# Media files configuration - ADD THIS SECTION
+# Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 

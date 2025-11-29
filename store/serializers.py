@@ -1,4 +1,3 @@
-# serializers.py
 from rest_framework import serializers
 from .models import ProductCategory, Product, Order, OrderItem
 from django.conf import settings
@@ -30,10 +29,11 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
+    product_name = serializers.CharField(source="product.name", read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = '__all__'
+        fields = ["id", "product", "product_name", "quantity", "price"]
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
@@ -42,4 +42,22 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = '__all__'
 
-# Add BASE_URL to your settings.py
+class AdminOrderSerializer(serializers.ModelSerializer):
+    customer_username = serializers.CharField(source="customer.username", read_only=True)
+    items = OrderItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            "id",
+            "customer",
+            "customer_username",
+            "status",
+            "delivery_status",
+            "total_amount",
+            "created_at",
+            "billing_name",
+            "billing_address",
+            "billing_phone",
+            "items",
+        ]
