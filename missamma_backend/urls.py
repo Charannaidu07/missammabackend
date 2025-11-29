@@ -9,4 +9,5 @@ urlpatterns = [
     path('api/store/', include('store.urls')),
     path('api/payments/', include('payments.urls')),
 ]
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
