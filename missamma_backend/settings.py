@@ -4,7 +4,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'change-this-to-your-secret-key'  # use env in production
-
+# Add to settings.py
+BASE_URL = 'https://missammabackend.onrender.com'
 DEBUG = False
 
 ALLOWED_HOSTS = ['*','missammabackend.onrender.com','localhost','127.0.0.1']
