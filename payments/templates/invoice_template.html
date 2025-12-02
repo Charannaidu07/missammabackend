@@ -1,0 +1,429 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Invoice {{ invoice.invoice_number }}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fce4ec;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+      padding: 20px 24px 28px;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #f8bbd0;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+
+    .brand-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: #c2185b;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .label-badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid #c8e6c9;
+      background: #e8f5e9;
+      color: #2e7d32;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .invoice-meta {
+      font-size: 11px;
+      text-align: right;
+      color: #444;
+    }
+
+    .invoice-meta div {
+      margin-bottom: 3px;
+    }
+
+    .label-row {
+      display: flex;
+      margin-top: 12px;
+      gap: 12px;
+    }
+
+    .address-box {
+      flex: 2;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    .address-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #555;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .address-name {
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .address-text {
+      font-size: 12px;
+      color: #444;
+    }
+
+    .contact-line {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #555;
+    }
+
+    .codes-box {
+      flex: 1.3;
+      border: 1px dashed #e0e0e0;
+      border-radius: 6px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .codes-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #777;
+      margin-bottom: 3px;
+    }
+
+    #barcode {
+      width: 100%;
+      height: 50px;
+    }
+
+    #qrcode {
+      margin-top: 4px;
+    }
+
+    .order-info-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+      font-size: 11px;
+    }
+
+    .chip {
+      padding: 4px 10px;
+      border-radius: 50px;
+      background: #f3e5f5;
+      color: #6a1b9a;
+      border: 1px solid #e1bee7;
+      font-weight: 600;
+    }
+
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 12px;
+    }
+
+    .items-table th,
+    .items-table td {
+      border-bottom: 1px solid #eee;
+      padding: 6px 4px;
+    }
+
+    .items-table th {
+      background: #f8bbd0;
+      color: #4a148c;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .items-table td {
+      vertical-align: top;
+    }
+
+    .price {
+      text-align: right;
+    }
+
+    .totals-row {
+      margin-top: 10px;
+      font-size: 13px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .totals-inner {
+      min-width: 220px;
+      border-top: 1px dashed #ccc;
+      padding-top: 6px;
+      font-size: 12px;
+    }
+
+    .totals-inner div {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+    }
+
+    .totals-inner div.total {
+      font-size: 14px;
+      font-weight: 800;
+      color: #c2185b;
+    }
+
+    .footer-note {
+      margin-top: 16px;
+      font-size: 10px;
+      color: #777;
+      border-top: 1px dashed #eee;
+      padding-top: 8px;
+      text-align: center;
+    }
+
+    .footer-note span {
+      color: #c2185b;
+      font-weight: 600;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+      .page {
+        box-shadow: none;
+        margin: 0;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- top header -->
+    <div class="header-row">
+      <div class="brand-block">
+        <div class="brand-name">Missamma Beauty Parlour</div>
+        <div class="brand-sub">Beauty • Spa • Bespoke Jewelry</div>
+        <div class="label-badge">Delivery &amp; Tax Invoice</div>
+      </div>
+      <div class="invoice-meta">
+        <div><strong>Invoice #:</strong> {{ invoice.invoice_number }}</div>
+        <div><strong>Order ID:</strong> {{ order.id }}</div>
+        <div><strong>Date:</strong> {{ order.created_at|date:"d M Y, H:i" }}</div>
+        <div><strong>Payment Status:</strong> {{ order.status }}</div>
+        {% if order.delivery_status %}
+        <div><strong>Delivery Status:</strong> {{ order.delivery_status }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- address + codes row -->
+    <div class="label-row">
+      <div class="address-box">
+        <div class="address-title">Dispatch From</div>
+        <div class="address-name">Missamma Beauty Parlour</div>
+        <div class="address-text">
+          1st Floor, Sample Street,<br />
+          Chennai - 600001, Tamil Nadu, India
+        </div>
+        <div class="contact-line">Phone: +91-98765-43210</div>
+      </div>
+
+      <div class="address-box">
+        <div class="address-title">Ship To</div>
+        <div class="address-name">{{ order.billing_name }}</div>
+        <div class="address-text">
+          {{ order.billing_address|linebreaksbr }}
+        </div>
+        <div class="contact-line">Phone: {{ order.billing_phone }}</div>
+      </div>
+
+      <div class="codes-box">
+        <div class="codes-label">Scan for Order Details</div>
+        <svg id="barcode"></svg>
+        <div id="qrcode"></div>
+      </div>
+    </div>
+
+    <!-- small order info chips -->
+    <div class="order-info-row">
+      <div class="chip">
+        Mode: 
+        {% if order.razorpay_order_id %} 
+          Online Prepaid (Razorpay)
+        {% else %}
+          Wallet Payment
+        {% endif %}
+      </div>
+      <div class="chip">Customer: {{ customer.username }}</div>
+      <div class="chip">Invoice Date: {{ invoice.generated_at|date:"d M Y" }}</div>
+    </div>
+
+    <!-- items table -->
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th style="width:5%;">#</th>
+          <th style="width:45%;">Item</th>
+          <th style="width:15%;">Qty</th>
+          <th style="width:15%;" class="price">Price (₹)</th>
+          <th style="width:20%;" class="price">Line Total (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>
+            {% if item.product %}
+              {{ item.product.name }}
+            {% else %}
+              Product #{{ item.product_id }}
+            {% endif %}
+          </td>
+          <td>{{ item.quantity }}</td>
+          <td class="price">{{ item.price }}</td>
+          <td class="price">
+            ₹ {{ item.line_total|default:item.get_line_total|floatformat:2 }}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" style="text-align: center; color: #777;">No items in this order</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- totals -->
+    <div class="totals-row">
+      <div class="totals-inner">
+        <div>
+          <span>Subtotal</span>
+          <span>₹ {{ order.total_amount|floatformat:2 }}</span>
+        </div>
+        {% if order.razorpay_order_id %}
+        <div>
+          <span>Cashback (5%)</span>
+          <span style="color: #2e7d32;">+₹ {{ cashback_amount|floatformat:2 }}</span>
+        </div>
+        {% endif %}
+        <div class="total">
+          <span>Grand Total</span>
+          <span>₹ {{ order.total_amount|floatformat:2 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- footer -->
+    <div class="footer-note">
+      This is a computer generated invoice for your order from
+      <span>Missamma Beauty Parlour</span>. Keep this label inside your package
+      like Amazon delivery bills &amp; present it during returns, if any.
+      {% if order.razorpay_order_id %}
+      <br><strong>5% cashback of ₹ {{ cashback_amount|floatformat:2 }} has been credited to your wallet!</strong>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Local QR + Barcode libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+  <script>
+    window.onload = function () {
+      // 1) Text for QR: the full URL of this invoice page
+      const qrText = window.location.href;
+      // 2) Text for barcode: just the invoice number (short = easier to scan)
+      const barcodeText = "{{ invoice.invoice_number|escapejs }}";
+
+      // BARCODE (CODE 128)
+      try {
+        if (typeof JsBarcode !== 'undefined') {
+          JsBarcode("#barcode", barcodeText, {
+            format: "CODE128",
+            lineColor: "#000000",
+            width: 2,
+            height: 60,
+            displayValue: false,
+            margin: 4
+          });
+        } else {
+          document.getElementById("barcode").innerHTML = "<div style='text-align:center; color:#777;'>Barcode: " + barcodeText + "</div>";
+        }
+      } catch (e) {
+        console.error("Barcode error:", e);
+        document.getElementById("barcode").innerHTML = "<div style='text-align:center; color:#777;'>Barcode: " + barcodeText + "</div>";
+      }
+
+      // QR CODE
+      try {
+        const qrContainer = document.getElementById("qrcode");
+        qrContainer.innerHTML = "";
+        
+        if (typeof QRCode !== 'undefined') {
+          new QRCode(qrContainer, {
+            text: qrText,
+            width: 180,
+            height: 180,
+            correctLevel: QRCode.CorrectLevel.H
+          });
+
+          // ensure good size when printing
+          const canvases = qrContainer.getElementsByTagName("canvas");
+          if (canvases.length > 0) {
+            canvases[0].style.width = "180px";
+            canvases[0].style.height = "180px";
+          }
+        } else {
+          qrContainer.innerHTML = "<div style='text-align:center; color:#777; padding:20px; border:1px dashed #ccc;'>QR Code<br>" + qrText.substring(0, 30) + "...</div>";
+        }
+      } catch (e) {
+        console.error("QR error:", e);
+        document.getElementById("qrcode").innerHTML = "<div style='text-align:center; color:#777; padding:20px; border:1px dashed #ccc;'>QR Code Error</div>";
+      }
+
+      // Auto print after everything is drawn
+      setTimeout(function () {
+        window.print();
+      }, 1000);
+    };
+  </script>
+</body>
+</html>
